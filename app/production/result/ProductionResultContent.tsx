@@ -2,6 +2,10 @@
 
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
+import {
+  estimateImpactOkuRange,
+  formatImpactRangeJa,
+} from "@/lib/improvementImpactEstimate";
 
 type Driver = {
   key: string;
@@ -73,6 +77,14 @@ export default function ProductionResultContent() {
     );
   }
 
+  const { lowOku, highOku } = estimateImpactOkuRange(
+    data.revenueOku,
+    data.improvementPotential
+  );
+  const impactRangeText = formatImpactRangeJa(lowOku, highOku);
+  const impactCardLabel =
+    highOku > 0 ? `${impactRangeText}規模` : impactRangeText;
+
   return (
     <main className="min-h-screen bg-[#F8FAFC] text-[#0A2643]">
       <header className="border-b-4 border-[#CEC1A1] bg-white">
@@ -139,7 +151,7 @@ export default function ProductionResultContent() {
             <div className="mb-2 text-sm font-semibold text-[#CEC1A1]">
               改善インパクトの目安
             </div>
-            <div className="text-2xl font-bold">数千万円〜数億円規模</div>
+            <div className="text-2xl font-bold">{impactCardLabel}</div>
           </div>
         </section>
 
@@ -157,8 +169,18 @@ export default function ProductionResultContent() {
               {" "}
               {data.improvementRange}{" "}
             </span>
-            程度の改善余地が存在すると言われています。売上規模を踏まえると、
-            数千万円〜数億円規模の改善インパクトが見込まれる可能性があります。
+            程度の改善余地が存在すると言われています。
+            {highOku > 0 ? (
+              <>
+                売上規模と改善余地から単純換算すると、
+                <span className="font-bold text-[#0A2643]">
+                  {impactRangeText}規模
+                </span>
+                の改善インパクトが見込まれる可能性があります。
+              </>
+            ) : (
+              <>改善余地が小さく、金額面での大きな効果は見込みにくい可能性があります。</>
+            )}
           </div>
         </section>
 
@@ -199,6 +221,7 @@ export default function ProductionResultContent() {
           <div className="text-sm leading-7 text-slate-500">
             ※本診断結果はヒアリング内容に基づく簡易評価であり、
             実際の改善効果は詳細分析により変動します。
+            金額の目安は売上規模と改善余地から算出した概算であり、原価構造により実額は異なります。
           </div>
         </section>
 
